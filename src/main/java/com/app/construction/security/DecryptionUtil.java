@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.app.construction.dto.DecryptDataDto;
-import com.app.construction.dto.EncryptData;
+import com.example.demo.dto.EncryptDataDto;
 
 public class DecryptionUtil {
 
@@ -21,19 +21,15 @@ public class DecryptionUtil {
 		return secretKey;
 	}
 
-	public static Object decrypt(DecryptDataDto encryptedData) throws Exception {
+	public static EncryptDataDto decrypt(DecryptDataDto encryptedData) throws Exception {
 		SecretKey key = stringToSecretKey(encryptedData.getSecretKey());
 		try {
 			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, key);
 			byte[] decodedData = Base64.getDecoder().decode(encryptedData.getEncryptedData());
 			byte[] decryptedData = cipher.doFinal(decodedData);
-//			EncryptData dataDto = deserialize(decryptedData, EncryptData.class);
-			ByteArrayInputStream bis = new ByteArrayInputStream(decryptedData);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			Object object = ois.readObject();
-			ois.close();
-			return object;
+			EncryptDataDto dataDto = deserialize(decryptedData, EncryptDataDto.class);
+			return dataDto;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -41,13 +37,13 @@ public class DecryptionUtil {
 		}
 	}
 
-//	private static <T> T deserialize(byte[] bytes, Class<T> clazz) {
-//		try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes); ObjectInput in = new ObjectInputStream(bis)) {
-//			Object obj = in.readObject();
-//			return clazz.cast(obj);
-//		} catch (IOException | ClassNotFoundException e) {
-//			e.printStackTrace();
-//			return null;
-//		}
-//	}
+	private static <T> T deserialize(byte[] bytes, Class<T> clazz) {
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes); ObjectInput in = new ObjectInputStream(bis)) {
+			Object obj = in.readObject();
+			return clazz.cast(obj);
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
